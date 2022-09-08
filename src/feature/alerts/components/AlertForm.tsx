@@ -1,21 +1,24 @@
 import { Box, Button, TextField, Typography } from '@mui/material';
 import React, { useState } from 'react'
 import { validateInput, validateURLInput } from '../../../utils';
-import { useAlertReducer } from '../contexts/AlertContext';
-import { Alert, CreateDefaultAlert } from '../types';
+import { useAlertAPI, useAlertState } from '../contexts/AlertContext';
+import { CreateDefaultAlert } from '../types';
 import * as uuid from 'uuid';
 
 
 
 
 export const AlertForm = () => {
-    const { alerts, addAlert } = useAlertReducer();
-    const [alert, setAlert] = useState<Alert>(CreateDefaultAlert);
+    const { addAlert } = useAlertAPI();
+    const { alerts } = useAlertState();
+    const [alert, setAlert] = useState(CreateDefaultAlert());
     const [formChanged, setFormChanged] = useState(false);
     const [validId, setvalidId] = useState(true);
     const [errors, setErrors] = useState<{
         [key: string]: string
     }>({});
+
+    console.log('Alert Form render');
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!formChanged) {

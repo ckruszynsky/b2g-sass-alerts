@@ -2,22 +2,18 @@ import { createContext, useContext, useReducer } from "react"
 import { Action, Alert, AlertActionTypes } from "../types";
 
 import React from "react";
-
-
-const initialState: Alert[] = [];
-
-interface AlertContextProps {
+type AlertState = {
     alerts: Alert[];
+};
+
+type AlertAPI = {
     addAlert: (alert: Alert) => void;
     removeAlert: (id: string) => void;
-}
+};
 
 
-const AlertContext = createContext<AlertContextProps>({
-    alerts: [],
-    addAlert: () => { },
-    removeAlert: () => { }
-});
+const AlertDataContext = createContext<AlertState>({} as AlertState);
+const AlertAPIContext = createContext<AlertAPI>({} as AlertAPI);
 
 
 const reducer = (state: Alert[], action: Action): Alert[] => {
@@ -31,34 +27,35 @@ const reducer = (state: Alert[], action: Action): Alert[] => {
     }
 }
 
-const AlertContextProvider = ({ children }: { children: React.ReactNode }) => {
-    const [state, dispatch] = useReducer(reducer, initialState);
+export const AlertDataProvider = ({ children }: { children: React.ReactNode }) => {
+    const [state, dispatch] = useReducer(reducer, []);
 
-    const addAlert = (alert: Alert) => {
-        const id = alert.id;
-        dispatch({ type: AlertActionTypes.ADD_ALERT, payload: alert });
-        return setTimeout(() => {
-            removeAlert(id);
-        }, !alert.timeLimit ? 10000 : (alert.timeLimit * 1000));
-    }
+    const api = React.useMemo(() => {
+        const addAlert = (alert: Alert) => {
+            const id = alert.id;
+            dispatch({ type: AlertActionTypes.ADD_ALERT, payload: alert });
+            return setTimeout(() => {
+                removeAlert(id);
+            }, !alert.timeLimit ? 10000 : (alert.timeLimit * 1000));
+        };
+        const removeAlert = (id: string) => {
+            dispatch({ type: AlertActionTypes.REMOVE_ALERT, payload: id });
+        };
+        return { addAlert, removeAlert };
+    }, []);
 
-    const removeAlert = (id: string) => {
-        dispatch({ type: AlertActionTypes.REMOVE_ALERT, payload: id });
-    }
 
     return (
-        <AlertContext.Provider value={{
-            alerts: state,
-            addAlert,
-            removeAlert,
-        }}>
-            {children}
-        </AlertContext.Provider>
+        <AlertAPIContext.Provider value={api}>
+            <AlertDataContext.Provider value={{ alerts: state }}>
+                {children}
+            </AlertDataContext.Provider>
+        </AlertAPIContext.Provider>
     );
 };
 
-export default AlertContextProvider;
-export const useAlertReducer = () => useContext(AlertContext);
+export const useAlertState = () => useContext(AlertDataContext);
+export const useAlertAPI = () => useContext(AlertAPIContext);
 
 
 

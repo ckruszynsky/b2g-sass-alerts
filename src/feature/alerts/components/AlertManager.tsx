@@ -2,10 +2,11 @@
 
 import { Alert, AlertTitle, Box, Snackbar } from '@mui/material';
 import React from 'react'
-import { useAlertReducer } from '../contexts/AlertContext'
+import { useAlertState } from '../contexts/AlertContext'
 
 export const AlertManager = () => {
-    const { alerts } = useAlertReducer();
+    const { alerts } = useAlertState();
+    console.log('Alert Manager render');
 
     return (
         <Snackbar
